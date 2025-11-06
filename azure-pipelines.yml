@@ -1,13 +1,11 @@
 trigger:
 - master
 
-#Usar agente
 pool:
   name: LocalPool
 
 variables:
   buildConfiguration: 'Release'
-  buildPlatform: 'Any CPU'
   solution: '**/*.sln'
 
 steps:
@@ -23,8 +21,17 @@ steps:
 - script: dotnet build $(solution) --configuration $(buildConfiguration) --no-restore
   displayName: 'Compilar solución'
 
-- script: dotnet test $(solution) --configuration $(buildConfiguration) --no-build --verbosity normal
-  displayName: 'Ejecutar pruebas'
+
+- task: VSTest@2
+  displayName: 'Ejecutar pruebas con Visual Studio Test'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\*test*.dll
+      !**\*TestAdapter.dll
+      !**\obj\**
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    diagnosticsEnabled: true
 
 - task: PublishBuildArtifacts@1
   inputs:
