@@ -1,26 +1,29 @@
 trigger:
 - master
 
+#Usar agente
 pool:
-  vmImage: 'LocalPool'
+  name: LocalPool
 
 variables:
   buildConfiguration: 'Release'
+  buildPlatform: 'Any CPU'
+  solution: '**/*.sln'
 
 steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '10.0.x'
-  displayName: 'Instalar .NET SDK'
+    version: '8.0.x'
+  displayName: 'Configurar .NET SDK 8.0'
 
-- script: dotnet restore
+- script: dotnet restore $(solution)
   displayName: 'Restaurar dependencias'
 
-- script: dotnet build --configuration $(buildConfiguration)
+- script: dotnet build $(solution) --configuration $(buildConfiguration) --no-restore
   displayName: 'Compilar solución'
 
-- script: dotnet test --configuration $(buildConfiguration) --no-build --verbosity normal
+- script: dotnet test $(solution) --configuration $(buildConfiguration) --no-build --verbosity normal
   displayName: 'Ejecutar pruebas'
 
 - task: PublishBuildArtifacts@1
